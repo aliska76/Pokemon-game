@@ -99,22 +99,6 @@ Navigate to http://localhost:5173
 - ✅ User progress saving
 - ✅ Responsive design
 
-### 📁 Project Structure
-```text
-pokemon-game/
-├── client/                 # Frontend React app
-│   ├── src/
-│   │   ├── App.tsx        # Main component
-│   │   ├── App.css        # Styles
-│   │   └── assets/        # Images and assets
-│   └── index.html
-├── db.js                   # Database configuration
-├── server.js               # Express server
-├── fetch-pokemon.js        # Pokemon data fetching
-├── package.json
-└── .env
-```
-
 ### 🗄️ Database Schema
 - users: User accounts and profiles
 - federated_credentials: OAuth connections
@@ -150,4 +134,5 @@ GitHub: @aliska76
 ⭐ Star this repo if you like it!
 
 Have fun guessing Pokémon! 🎉
+
 
