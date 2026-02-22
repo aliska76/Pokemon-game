@@ -147,4 +147,7 @@ GitHub: @aliska76
 - Built with Vite + React + TypeScript
 - Authentication powered by Passport.js
 
+⭐ Star this repo if you like it!
+
+Have fun guessing Pokémon! 🎉
 
