@@ -7,24 +7,6 @@ SQLite local file:
 database.sqlite
 ```
 
-Entities:
-
-- User
-- Message
-- Vote
-
-Each entity includes:
-
-- uuid primary key
-- createdAt
-- updatedAt
-
-Vote uniqueness constraint:
-
-```
-UNIQUE(user_id, message_id)
-```
-
 ## 📋 Prerequisites
 
 - Node.js (v16 or higher)
@@ -56,4 +38,5 @@ npm run start
 
 ## 👥 Author
 Alisa Rakhlina
+
 
