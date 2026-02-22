@@ -26,6 +26,9 @@ Test your Pokémon knowledge by guessing the missing letters in various Pokémon
 - **Passport.js** with Google OAuth 2.0 authentication
 - **Express Session** for session management
 
+### APIs & Data
+PokéAPI - The RESTful Pokémon API (https://pokeapi.co/)
+REST API - Custom backend API
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -119,6 +122,13 @@ pokemon-game/
 - scores: User scores and leaderboard
 - pokemon_usage: Track which Pokémon users have seen
 
+### 🔄 How Pokémon Data Works
+The app fetches Pokémon data from The RESTful Pokémon API (PokéAPI):
+- On server start, it fetches the first 151 Pokémon (original generation)
+- Pokémon names are stored in the local SQLite database
+- Each game session randomly selects a Pokémon from the database
+- The name is masked for the guessing game
+
 ### 🤝 Contributing
 Contributions are welcome! Feel free to:
 
@@ -136,4 +146,5 @@ GitHub: @aliska76
 - Pokémon data sourced from PokéAPI
 - Built with Vite + React + TypeScript
 - Authentication powered by Passport.js
+
 
