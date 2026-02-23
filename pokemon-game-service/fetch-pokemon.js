@@ -32,7 +32,7 @@ async function populatePokemons() {
 function maskPokemonName(name) {
   if (!name || name.length === 0) return '';
   
-  // pick a random letter to hide
+  // Pick a random letter to hide
   const index = Math.floor(Math.random() * name.length);
   const masked = name.split('').map((c, i) => i === index ? '_' : c).join('');
   
