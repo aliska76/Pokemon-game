@@ -10,6 +10,53 @@ const { populatePokemons, maskPokemonName } = require('./fetch-pokemon.js');
 const app = express();
 const port = 3000;
 
+const util = require('util');
+
+const dbGet = util.promisify(db.get).bind(db);
+const dbRun = util.promisify(db.run).bind(db);
+const dbAll = util.promisify(db.all).bind(db);
+
+async function getRandomPokemon() {
+    const row = await dbGet(`
+        SELECT * FROM pokemon
+        ORDER BY RANDOM()
+        LIMIT 1
+    `);
+
+    if (!row) {
+        throw new Error('No Pokémon found');
+    }
+
+    const { masked, index } = maskPokemonName(row.name);
+    console.log('originalName', row.name);
+
+    return {
+        pokemonId: row.id,
+        maskedName: masked,
+        missingIndex: index,
+        originalName: row.name
+    };
+}
+
+async function updateScore(userId, addPoints = 0) {
+    const row = await dbGet(
+        "SELECT score FROM scores WHERE user_id = ?",
+        [userId]
+    );
+
+    const newScore = (row?.score || 0) + addPoints;
+
+    await dbRun(
+        `INSERT INTO scores (user_id, score)
+        VALUES (?, ?)
+        ON CONFLICT(user_id)
+        DO UPDATE SET score = excluded.score`,
+        [userId, newScore]
+    );
+
+    return newScore;
+}
+
 async function startServer() {
     // Call it once when server starts
     const pokemonList = await populatePokemons();
@@ -34,7 +81,7 @@ async function startServer() {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: "http://localhost:3000/auth/google/callback"
     },
-    function(accessToken, refreshToken, profile, done) {
+    function(profile, done) {
         db.get(
             "SELECT user_id FROM federated_credentials WHERE provider = ? AND subject = ?",
             ['google', profile.id],
@@ -43,23 +90,23 @@ async function startServer() {
 
                 if (!row) {
                     db.run(
-                    "INSERT INTO users (username, name) VALUES (?, ?)",
-                    [profile.emails[0].value, profile.displayName],
-                    function(err) {
-                        if (err) return done(err);
-
-                        const userId = this.lastID;
-
-                        db.run(
-                        "INSERT INTO federated_credentials (user_id, provider, subject) VALUES (?, ?, ?)",
-                        [userId, 'google', profile.id],
+                        "INSERT INTO users (username, name) VALUES (?, ?)",
+                        [profile.emails[0].value, profile.displayName],
                         function(err) {
                             if (err) return done(err);
 
-                            return done(null, { id: userId, name: profile.displayName });
+                            const userId = this.lastID;
+
+                            db.run(
+                                "INSERT INTO federated_credentials (user_id, provider, subject) VALUES (?, ?, ?)",
+                                [userId, 'google', profile.id],
+                                function(err) {
+                                    if (err) return done(err);
+
+                                    return done(null, { id: userId, name: profile.displayName });
+                                }
+                            );
                         }
-                        );
-                    }
                     );
                 } else {
                     return done(null, { id: row.user_id });
@@ -110,107 +157,53 @@ async function startServer() {
         res.json(req.user);
     });
 
-    app.get('/game/start', (req, res) => {
-        db.get(`
-            SELECT * FROM pokemon
-            ORDER BY RANDOM()
-            LIMIT 1
-        `, [], (err, row) => {
-
-            if (err) {
-                console.error('DB error:', err);
-                return res.status(500).json({ error: 'DB error' });
-            }
-
-            if (!row) {
-                return res.status(404).json({ error: 'No Pokémon found' });
-            }
-            
-            console.log("row.name", row.name)
-
-            const { masked, index } = maskPokemonName(row.name);
-            console.log("masked", masked)
-
-            res.json({
-                pokemonId: row.id,
-                maskedName: masked,
-                missingIndex: index
-            });
-        });
+    app.get('/game/start', async (req, res) => {
+        try {
+            const pokemon = await getRandomPokemon();
+            res.json(pokemon);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: err.message });
+        }
     });
 
-    app.post('/game/guess', (req, res) => {
-        const { pokemonId, letter, missingIndex } = req.body || {};
-        const userId = req.user?.id || 1;
+    app.post('/game/guess', async (req, res) => {
+        try {
+            const { pokemonId, letter, missingIndex } = req.body || {};
+            const userId = req.user?.id || 1;
 
-        if (!pokemonId || !letter || missingIndex === undefined) {
-            return res.status(400).json({ error: 'Invalid request' });
-        }
+            if (!pokemonId || !letter || missingIndex === undefined) {
+                return res.status(400).json({ error: 'Invalid request' });
+            }
 
-        db.get("SELECT name FROM pokemon WHERE id = ?", [pokemonId], (err, row) => {
-            if (err) return res.status(500).json({ error: 'DB error' });
-            if (!row) return res.status(404).json({ error: 'Pokemon not found' });
+            const row = await dbGet(
+                "SELECT name FROM pokemon WHERE id = ?",
+                [pokemonId]
+            );
+
+            if (!row) {
+                return res.status(404).json({ error: 'Pokemon not found' });
+            }
 
             const correctLetter = row.name[missingIndex];
-            const isCorrect =
-            letter.toLowerCase() === correctLetter.toLowerCase();
+            const isCorrect = correctLetter.toLowerCase() === letter.toLowerCase();
 
-            const addScoreAndContinue = (newScore) => {
-                db.get(`
-                    SELECT * FROM pokemon
-                    ORDER BY RANDOM()
-                    LIMIT 1
-                `, [], (err, newPokemon) => {
+            const newScore = isCorrect
+                ? await updateScore(userId, 10)
+                : await updateScore(userId, 0);
 
-                    if (err || !newPokemon) {
-                        return res.status(500).json({ error: 'Failed to get new pokemon' });
-                    }
+            const nextPokemon = await getRandomPokemon();
 
-                    const { masked, index } = maskPokemonName(newPokemon.name);
-                    console.log('Pokemon name', newPokemon.name)
-                    res.json({
-                        correct: isCorrect,
-                        newScore,
-                        nextPokemon: {
-                            pokemonId: newPokemon.id,
-                            maskedName: masked,
-                            missingIndex: index
-                        }
-                    });
-                });
-            };
+            res.json({
+                correct: isCorrect,
+                newScore,
+                nextPokemon
+            });
 
-            if (isCorrect) {
-                db.get(
-                    "SELECT score FROM scores WHERE user_id = ?",
-                    [userId],
-                    (err, scoreRow) => {
-                        const newScore = (scoreRow?.score || 0) + 10;
-
-                        db.run(
-                            `INSERT INTO scores (user_id, score)
-                            VALUES (?, ?)
-                            ON CONFLICT(user_id)
-                            DO UPDATE SET score = excluded.score`,
-                            [userId, newScore],
-                            function(err) {
-                                if (err) return res.status(500).json({ error: 'DB error' });
-                                addScoreAndContinue(newScore);
-                            }
-                        );
-                    }
-                );
-            } else {
-                db.get(
-                    "SELECT score FROM scores WHERE user_id = ?",
-                    [userId],
-                    (err, scoreRow) => {
-                        const currentScore = scoreRow?.score || 0;
-                        addScoreAndContinue(currentScore);
-                    }
-                );
-            }
-        });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Server error' });
+        }
     });
 
     app.post('/logout', (req, res) => {
@@ -274,7 +267,7 @@ async function startServer() {
 
 
     app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+        console.log(`Example app listening on port ${port}`);
     });
 }
 
