@@ -216,7 +216,7 @@ async function startServer() {
         if (req.isAuthenticated()) {
             return next();
         }
-    res.status(401).json({ error: 'Unauthorized' });
+        res.status(401).json({ error: 'Unauthorized' });
     }
 
     app.post('/game/result', ensureAuthenticated, (req, res) => {
@@ -267,7 +267,7 @@ async function startServer() {
 
 
     app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`);
+        console.log(`Server is listening on port ${port}`);
     });
 }
 
