@@ -66,6 +66,12 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
+or use mine credentials. Add it to .env file:
+```env
+GOOGLE_CLIENT_ID=718159560152-vs5qpoh5gsmneaul96beut435ke99b15.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+```
+
 5. **Set up Google OAuth**
 
 - Go to Google Cloud Console
@@ -142,3 +148,4 @@ GitHub: @aliska76
 ⭐ Star this repo if you like it!
 
 Have fun guessing Pokémon! 🎉
+
