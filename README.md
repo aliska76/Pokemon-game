@@ -75,18 +75,21 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 - Add authorized redirect URI: http://localhost:3000/auth/google/callback
 
 6. **Run the application**
+Open server and frontend in separate terminals.
 
 Start the backend server:
 
 ```bash
-npm start
+cd pokemon-game-service
+npm run start
 ```
 In a separate terminal, start the frontend:
 
 ```bash
-cd client
+cd pokemon-game-frontend
 npm run dev
 ```
+
 7. **Open your browser**
 Navigate to http://localhost:5173
 
@@ -138,3 +141,4 @@ GitHub: @aliska76
 ⭐ Star this repo if you like it!
 
 Have fun guessing Pokémon! 🎉
+
