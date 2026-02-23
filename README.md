@@ -45,17 +45,16 @@ cd Pokemon-game
 ```
 
 2. **Install backend dependencies***
-```
-bash
+```bash
+cd pokemon-game-service
 npm install
 ```
 
 3. **Install frontend dependencies**
 
 ```bash
-cd client
+cd pokemon-game-frontend
 npm install
-cd ..
 ```
 
 4. **Set up environment variables**
@@ -113,12 +112,17 @@ The app fetches Pokémon data from The RESTful Pokémon API (PokéAPI):
 - Each game session randomly selects a Pokémon from the database
 - The name is masked for the guessing game
 
-### 🤝 Contributing
-Contributions are welcome! Feel free to:
+### 🐛 Debugging
+The backend includes console.log statements for easier debugging and development
+These logs help track:
+- Pokémon data loading
+- User authentication flow
+- Game state and masking
+- Database errors and operations
+Feel free to use them for your own debugging needs!
 
-- Report bugs
-- Suggest new features
-- Submit pull requests
+### 🤝 Contributing
+Contributions, issues, and feature requests are welcome!
 
 ### 📝 License
 This project is for educational purposes.
@@ -134,5 +138,3 @@ GitHub: @aliska76
 ⭐ Star this repo if you like it!
 
 Have fun guessing Pokémon! 🎉
-
-
