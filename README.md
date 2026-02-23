@@ -58,6 +58,7 @@ npm install
 ```
 
 4. **Set up environment variables**
+
 Create a .env file in the root directory:
 
 ```env
@@ -75,12 +76,12 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 - Add authorized redirect URI: http://localhost:3000/auth/google/callback
 
 6. **Run the application**
+
 Open server and frontend in separate terminals.
 
 Start the backend server:
 
 ```bash
-cd pokemon-game-service
 npm run start
 ```
 In a separate terminal, start the frontend:
@@ -89,8 +90,8 @@ In a separate terminal, start the frontend:
 cd pokemon-game-frontend
 npm run dev
 ```
-
 7. **Open your browser**
+
 Navigate to http://localhost:5173
 
 ### 🎯 Features
@@ -141,4 +142,3 @@ GitHub: @aliska76
 ⭐ Star this repo if you like it!
 
 Have fun guessing Pokémon! 🎉
-
